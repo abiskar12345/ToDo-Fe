@@ -12,23 +12,23 @@ const { Content } = Layout;
 
 function App() {
   return (
-    <Layout>
-      <HeaderComponent />
+    <Router basename="/">
       <Layout>
-        <Content>
-          <AppContextProvider>
-            <Router>
+        <HeaderComponent />
+        <Layout>
+          <Content>
+            <AppContextProvider>
               <Routes>
                 <Route path="/todo" element={<ListComponent />} />
                 <Route path="/" element={<ListComponent />} />
                 <Route path="/todo/add" element={<FormComponent />} />
-                <Route path="/todo/add/:id" element={<FormComponent />} />
+                <Route path="/todo/edit/:id" element={<FormComponent />} />
               </Routes>
-            </Router>
-          </AppContextProvider>
-        </Content>
+            </AppContextProvider>
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </Router>
   );
 }
 

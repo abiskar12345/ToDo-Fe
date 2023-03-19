@@ -3,7 +3,7 @@ import qs from "qs";
 import { API_BASE_URL } from "../configs/AppConfigs";
 
 interface Todo {
-  id: number;
+  _id: string;
   name: string;
   dateTime: Date;
   shortDescription: string;
@@ -49,11 +49,20 @@ export const updateTodo = (param: number, payload: any): Promise<void> => {
   });
 };
 
-export const deleteTodo = (param: number): Promise<void> => {
+export const deleteTodo = (param: string): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     axios
       .delete(`${API_BASE_URL}/api/v1/todo/${param}`)
       .then((res) => resolve(res.data))
+      .catch((err) => reject(err.response.data as ErrorResponse));
+  });
+};
+
+export const getById = (param: string): Promise<Todo> => {
+  return new Promise<Todo>((resolve, reject) => {
+    axios
+      .get(`${API_BASE_URL}/api/v1/todo/${param}`)
+      .then((res) => resolve(res.data.data))
       .catch((err) => reject(err.response.data as ErrorResponse));
   });
 };

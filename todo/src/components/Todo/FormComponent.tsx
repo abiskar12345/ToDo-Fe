@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import {
   Layout,
   Form,
@@ -10,9 +10,9 @@ import {
   Alert,
   Radio,
 } from "antd";
-import moment, { Moment } from "moment";
-import { AppContext } from "../../modules/Context";
+import { AppContext, Todo } from "../../modules/Context";
 import { useParams } from "react-router-dom";
+import moment, { Moment } from "moment";
 const { Content } = Layout;
 
 const { TextArea } = Input;
@@ -36,37 +36,63 @@ type AlertType = {
 
 const FormComponent: React.FC = () => {
   const { id: taskId } = useParams<{ id: string }>();
-  const { addTodo, updateTodo, refreshState } = useContext(AppContext);
+  const { addTodo, updateTodo, refreshState, getById, singleTask } =
+    useContext(AppContext);
   const [form] = Form.useForm();
   const [alert, setAlert] = useState<AlertType>({
     show: false,
     message: "",
     type: undefined,
   });
-
   const onFinishFailed = (errorInfo: any) => {
     console.log("Failed:", errorInfo);
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async ({ dateTime, ...rest }: any) => {
     try {
-      console.log(values);
-      taskId ? await updateTodo(taskId, values) : await addTodo(values);
+      taskId
+        ? await updateTodo(taskId, { ...rest })
+        : await addTodo({ dateTime, ...rest });
       setAlert({
         show: true,
-        message: " Successsfully,Task added To ToDo list",
+        message: taskId
+          ? "updated tasks Successfully"
+          : " Successsfully,Task added To ToDo list",
         type: "success",
       });
+      refreshState();
     } catch (err) {
       console.log({ err });
       setAlert({
         show: true,
-        message: "Error on Adding task to ToDo list",
+        message: taskId
+          ? " error on updating tasks"
+          : "Error on Adding task to ToDo list",
         type: "error",
       });
     }
   };
-  useEffect(() => {}, [alert]);
+  const getDetail = useCallback(async () => {
+    if (!taskId) return;
+    await getById(taskId);
+  }, [taskId]);
+
+  useEffect(() => {
+    getDetail();
+  }, [getDetail]);
+
+  useEffect(() => {
+    const { name, shortDescription, dateTime, status } = singleTask;
+    if (singleTask.name === "") return;
+    console.log(moment(dateTime));
+
+    form.setFieldsValue({
+      name,
+      dateTime: moment(dateTime),
+      shortDescription,
+      status,
+    });
+  }, [singleTask]);
 
   return (
     <Content
